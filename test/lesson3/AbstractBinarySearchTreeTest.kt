@@ -1,11 +1,12 @@
 package lesson3
 
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.util.*
 import kotlin.math.abs
-import kotlin.test.*
-import org.junit.jupiter.api.assertDoesNotThrow
-import kotlin.IllegalStateException
-import kotlin.NoSuchElementException
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 abstract class AbstractBinarySearchTreeTest {
 
@@ -200,7 +201,7 @@ abstract class AbstractBinarySearchTreeTest {
                     "BinarySearchTreeIterator doesn't traverse the tree correctly."
                 )
             }
-            assertFailsWith<IllegalStateException>("Something was supposedly returned after the elements ended") {
+            assertFailsWith<java.util.NoSuchElementException>("Something was supposedly returned after the elements ended") {
                 binaryIter.next()
             }
             println("All clear!")
@@ -229,7 +230,7 @@ abstract class AbstractBinarySearchTreeTest {
             controlSet.remove(toRemove)
             println("Control set: $controlSet")
             println("Removing element $toRemove from the tree through the iterator...")
-            val iterator = binarySet.iterator()
+            var iterator = binarySet.iterator()
             assertFailsWith<IllegalStateException>("Something was supposedly removed before the iteration started") {
                 iterator.remove()
             }
@@ -246,6 +247,10 @@ abstract class AbstractBinarySearchTreeTest {
                     }
                 }
             }
+
+
+
+
             assertEquals(
                 0, counter,
                 "BinarySearchTreeIterator.remove() changed iterator position: ${abs(counter)} elements were ${if (counter > 0) "skipped" else "revisited"}."
@@ -270,6 +275,23 @@ abstract class AbstractBinarySearchTreeTest {
                     "The tree has the element $element that is not in control set."
                 )
             }
+
+            iterator = binarySet.iterator()
+            counter = binarySet.size
+            print("Iterating: ")
+            println("Initial set: $controlSet")
+            controlSet.removeAll(binarySet)
+            println("Control set: $controlSet")
+            while (iterator.hasNext()) {
+                val element = iterator.next()
+                print("$element, ")
+                counter--
+                iterator.remove()
+            }
+            assertEquals(
+                controlSet.size, binarySet.size,
+                "The size of the tree is incorrect: was ${binarySet.size}, should've been ${controlSet.size}."
+            )
             println("All clear!")
         }
     }
@@ -336,6 +358,61 @@ abstract class AbstractBinarySearchTreeTest {
             var validElementCounter = 0
             for (i in 1..50) {
                 val value = random.nextInt(100)
+                if (value in fromElement until toElement) {
+                    if (random.nextBoolean()) {
+                        if (initialSet.add(value)) {
+                            allElementCounter++
+                            validElementCounter++
+                        }
+                        assertTrue(
+                            subSet.contains(value),
+                            "A subset doesn't contain a valid element of the initial set."
+                        )
+                    } else {
+                        if (subSet.add(value)) {
+                            allElementCounter++
+                            validElementCounter++
+                        }
+                        assertTrue(
+                            initialSet.contains(value),
+                            "The initial set doesn't contain an element of the subset."
+                        )
+                    }
+                } else {
+                    if (initialSet.add(value)) {
+                        allElementCounter++
+                    }
+                    assertFalse(
+                        subSet.contains(value),
+                        "A subset contains an illegal element of the initial set."
+                    )
+                }
+            }
+            assertEquals(
+                allElementCounter, initialSet.size,
+                "The size of the initial set is not as expected."
+            )
+            assertEquals(
+                validElementCounter, subSet.size,
+                "The size of the subset is not as expected."
+            )
+            println("All clear!")
+        }
+    }
+
+    protected fun doSubSetRelationTestLit() {
+        implementationTest { create().subSet(0, 0) }
+        val random = Random()
+        for (iteration in 1..100) {
+            val initialSet = BinarySearchTree<Char>();
+            val fromElement = (random.nextInt(12) + 'a'.toInt()).toChar()
+            val toElement = fromElement + random.nextInt(12)
+            val subSet = initialSet.subSet(fromElement, toElement)
+            println("Checking if the subset from $fromElement to $toElement is a valid view of the initial set...")
+            var allElementCounter = 0
+            var validElementCounter = 0
+            for (i in 1..50) {
+                val value = (random.nextInt(25) + 'a'.toInt()).toChar()
                 if (value in fromElement until toElement) {
                     if (random.nextBoolean()) {
                         if (initialSet.add(value)) {

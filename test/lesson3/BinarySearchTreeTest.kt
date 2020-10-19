@@ -54,6 +54,7 @@ class BinarySearchTreeTest : AbstractBinarySearchTreeTest() {
     @Tag("8")
     fun subSetRelationTestJava() {
         doSubSetRelationTest()
+        doSubSetRelationTestLit()
     }
 
     @Test

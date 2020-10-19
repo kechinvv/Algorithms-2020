@@ -1,5 +1,6 @@
 package lesson1
 
+import org.junit.Assert
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import util.PerfResult
 import util.estimate
@@ -8,6 +9,7 @@ import java.io.File
 import java.util.*
 import kotlin.math.abs
 import kotlin.system.measureNanoTime
+import kotlin.test.assertFails
 
 abstract class AbstractTaskTests : AbstractFileTests() {
 
@@ -73,6 +75,11 @@ abstract class AbstractTaskTests : AbstractFileTests() {
         } finally {
             File("temp.txt").delete()
         }
+        try {
+            assertFails("Format error") { sortAddresses("input/addr_in4.txt", "temp.txt") }
+        } finally {
+            File("temp.txt").delete()
+        }
     }
 
     private fun generateTemperatures(size: Int): PerfResult<Unit> {
@@ -115,6 +122,12 @@ abstract class AbstractTaskTests : AbstractFileTests() {
                     121.3
                 """.trimIndent()
             )
+        } finally {
+            File("temp.txt").delete()
+        }
+        try {
+            sortTemperatures("input/temp_in2.txt", "temp.txt")
+            assertFileContent("input/temp_out2.txt", File("temp.txt").readLines())
         } finally {
             File("temp.txt").delete()
         }
