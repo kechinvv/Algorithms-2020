@@ -77,7 +77,7 @@ public class JavaTasks {
      */
     static public void sortAddresses(String inputName, String outputName) throws IOException {
         List<String> text = Files.readAllLines(Paths.get(inputName));
-        TreeMap<String, List<String>> map = new TreeMap((Comparator<String>) (o1, o2) -> {
+        TreeMap<String, List<String>> map = new TreeMap<>((o1, o2) -> {
             String[] a = o1.split(" ");
             String[] b = o2.split(" ");
             if (a[0].equals(b[0])) {
@@ -90,24 +90,25 @@ public class JavaTasks {
             if (pattern.matcher(line).matches()) {
                 Matcher match = pattern.matcher(line);
                 while (match.find())
-                    if (map.get(match.group(2)) == null) //O(log n)
-                        map.put(match.group(2), new ArrayList<>(Arrays.asList(match.group(1))));
+                    if (map.get(match.group(2)) == null)
+                        map.put(match.group(2), new ArrayList<>(Collections.singletonList(match.group(1))));
                     else {
                         map.get(match.group(2)).add(match.group(1));
                     }
             } else throw new IllegalArgumentException();
         }
-        BufferedWriter f = newBufferedWriter(Paths.get(outputName), WRITE, CREATE, TRUNCATE_EXISTING);
-        for (String key : map.keySet()) {
-            String[] names = map.get(key).toArray(String[]::new); // o(log n)
-            Arrays.sort(names); //O(m log m)
-            f.write(key + " - " + names[0]);
-            if (names.length > 1) for (int i = 1; i < names.length; i++) f.write(", " + names[i]);
-            f.write("\n");
+        try (BufferedWriter f = newBufferedWriter(Paths.get(outputName), WRITE, CREATE, TRUNCATE_EXISTING)) {
+            for (String key : map.keySet()) {
+                String[] names = map.get(key).toArray(String[]::new);
+                Arrays.sort(names);
+                f.write(key + " - " + names[0]);
+                if (names.length > 1) for (int i = 1; i < names.length; i++) f.write(", " + names[i]);
+                f.write("\n");
+            }
         }
-        f.close();
     }
-// трудоемкость: n (O(log n) + O(m log m)) Ресурсоемкость: O(n*m)
+// трудоемкость: O(n log n) Ресурсоемкость: O(n)
+
     /**
      * Сортировка температур
      * <p>
@@ -142,13 +143,14 @@ public class JavaTasks {
         List<String> text = Files.readAllLines(Paths.get(inputName));
         int size = text.size();
         int[] temp = new int[size];
-        for (int i = 0; i < size; i++) temp[i] = (int) (Double.parseDouble(text.get(i))*10+2730);
+        for (int i = 0; i < size; i++) temp[i] = (int) (Double.parseDouble(text.get(i)) * 10 + 2730);
         temp = Sorts.countingSort(temp, 7730); // o(n)
-        BufferedWriter f = newBufferedWriter(Paths.get(outputName), WRITE, CREATE, TRUNCATE_EXISTING);
-        for (int i: temp) f.write(((double)i-2730)/10.0 + "\n");
-        f.close();
+        try (BufferedWriter f = newBufferedWriter(Paths.get(outputName), WRITE, CREATE, TRUNCATE_EXISTING)) {
+            for (int i : temp) f.write(((double) i - 2730) / 10.0 + "\n");
+        }
     }
     // трудоемкость: O(n) Ресурсоемкость: O(n)
+
     /**
      * Сортировка последовательности
      * <p>

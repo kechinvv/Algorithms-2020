@@ -36,16 +36,16 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
     }
 
 
-    private List<Node<T>> findwithParrent(Node<T> start, T value, Node<T> parrent) {
+    private List<Node<T>> findwithParent(Node<T> start, T value, Node<T> parrent) {
         int comparison = value.compareTo(start.value);
         if (comparison == 0) {
             return List.of(start, parrent);
         } else if (comparison < 0) {
             if (start.left == null) return List.of(start, parrent);
-            return findwithParrent(start.left, value, start);
+            return findwithParent(start.left, value, start);
         } else {
             if (start.right == null) return List.of(start, parrent);
-            return findwithParrent(start.right, value, start);
+            return findwithParent(start.right, value, start);
         }
     }
     // трудоемкость: O(log n)  ресурсоемкость: O(m)
@@ -104,7 +104,7 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
     @Override
     public boolean remove(Object o) {
         boolean r = false;
-        List<Node<T>> list = this.findwithParrent(root, (T) o, root);
+        List<Node<T>> list = this.findwithParent(root, (T) o, root);
         Node<T> node = list.get(0);
         Node<T> par = list.get(1);
         int comparison = node == null ? -1 : ((T) o).compareTo(node.value);
@@ -333,11 +333,12 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
     }
 
     public class BinarySearchTreeIterator implements Iterator<T> {
-
-        private T e;
+        List<Node<T>> list = new ArrayList<Node<T>>();
         private boolean flag = false;
 
         private BinarySearchTreeIterator() {
+            list.add(null);
+            list.add(null);
         }
 
         /**
@@ -354,8 +355,7 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
         public boolean hasNext() {
             if (root != null) {
                 flag = false;
-                if (e == null) return true;
-                List<Node<T>> list = BinarySearchTree.this.findwithParrent(root, e, root);
+                if (list.get(0) == null) return true;
                 return list.get(1) != null && list.get(1).value.compareTo(list.get(0).value) > 0 ||
                         list.get(0).right != null;
             } else return false;
@@ -377,16 +377,18 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
          */
         @Override
         public T next() {
-            if (e == null) {
-                e = BinarySearchTree.this.first();
-                return e;
+            if (list.get(0) == null) {
+                list = new ArrayList<>(BinarySearchTree.this.findwithParent(root, BinarySearchTree.this.first(), root));
+                return list.get(0).value;
             }
-            List<Node<T>> list = BinarySearchTree.this.findwithParrent(root, e, root);
-            if (list.get(1) != null && list.get(1).value.compareTo(list.get(0).value) > 0) e = list.get(1).value;
-            else if (list.get(0).right != null) e = list.get(0).right.value;
-            else throw new NoSuchElementException();
+            if (list.get(1) != null && list.get(1).value.compareTo(list.get(0).value) > 0)
+                list = new ArrayList<>(BinarySearchTree.this.findwithParent(root, list.get(1).value, root));
+            else if (list.get(0).right != null) {
+                list.set(1, list.get(0));
+                list.set(0, list.get(0).right);
+            } else throw new NoSuchElementException();
             flag = false;
-            return e;
+            return list.get(0).value;
         }
         // трудоемкость: O(log n)  ресурсоемкость: O(m)
 
@@ -404,14 +406,16 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
          */
         @Override
         public void remove() {
-            if (e == null || flag)
+            if (list.get(0) == null || flag)
                 throw new IllegalStateException();
-            List<Node<T>> list = BinarySearchTree.this.findwithParrent(root, e, root);
             BinarySearchTree.this.remove(list.get(0).value);
             flag = true;
-            if (list.get(0).left != null) e = list.get(0).left.value;
-            else if (list.get(1) != null && list.get(1).value.compareTo(e) < 0) e = list.get(1).value;
-            else e = null;
+            if (list.get(0).left != null) {
+                list.set(1, list.get(0));
+                list.set(0, list.get(0).left);
+            } else if (list.get(1) != null && list.get(1).value.compareTo(list.get(0).value) < 0)
+                list = new ArrayList<>(BinarySearchTree.this.findwithParent(root, list.get(1).value, root));
+            else list.set(0, null);
         }
         // трудоемкость: O(log n)  ресурсоемкость: O(m)
     }
