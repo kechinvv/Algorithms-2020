@@ -375,18 +375,44 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
          * <p>
          * Средняя
          */
+        public void small() {
+            while (true) {
+                if (list.get(0).left != null) {
+                    list.set(1, list.get(0));
+                    list.set(0, list.get(0).left);
+                } else if (list.get(0).right != null) {
+                    list.set(1, list.get(0));
+                    list.set(0, list.get(0).right);
+                } else break;
+            }
+        }
+
         @Override
         public T next() {
             if (list.get(0) == null) {
                 list = new ArrayList<>(BinarySearchTree.this.findwithParent(root, BinarySearchTree.this.first(), root));
                 return list.get(0).value;
             }
-            if (list.get(1) != null && list.get(1).value.compareTo(list.get(0).value) > 0)
-                list = new ArrayList<>(BinarySearchTree.this.findwithParent(root, list.get(1).value, root));
+            if (list.get(0).value.compareTo(root.value) == 0) {
+                list.set(1, list.get(0));
+                list.set(0, list.get(0).right);
+            }
+            else  if (list.get(0).value.compareTo(root.value) > 0)
+                if (list.get(0).left != null) {
+                    list.set(1, list.get(0));
+                    list.set(0, list.get(0).left);
+                    this.small();
+                } else if (list.get(1) != null && list.get(1).value.compareTo(list.get(0).value) < 0 && list.get(0).right!=null) {
+                    list.set(1, list.get(0));
+                    list.set(0, list.get(0).right);
+                } else throw new NoSuchElementException();
             else if (list.get(0).right != null) {
                 list.set(1, list.get(0));
                 list.set(0, list.get(0).right);
-            } else throw new NoSuchElementException();
+                this.small();
+            } else if (list.get(1) != null && list.get(1).value.compareTo(list.get(0).value) > 0)
+                list = new ArrayList<>(BinarySearchTree.this.findwithParent(root, list.get(1).value, root));
+            else throw new NoSuchElementException();
             flag = false;
             return list.get(0).value;
         }
