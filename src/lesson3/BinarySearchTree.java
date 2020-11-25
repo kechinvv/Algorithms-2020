@@ -333,12 +333,17 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
     }
 
     public class BinarySearchTreeIterator implements Iterator<T> {
-        List<Node<T>> list = new ArrayList<Node<T>>();
-        private boolean flag = false;
+        ArrayDeque<Node<T>> deq = new ArrayDeque<>();
+        T cur = null;
 
         private BinarySearchTreeIterator() {
-            list.add(null);
-            list.add(null);
+            if (root != null) fillStack(root);
+        }
+
+        public void fillStack(Node<T> cur) {
+            if (cur.left != null) fillStack(cur.left);
+            deq.push(cur);
+            if (cur.right != null) fillStack(cur.right);
         }
 
         /**
@@ -353,14 +358,9 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
          */
         @Override
         public boolean hasNext() {
-            if (root != null) {
-                flag = false;
-                if (list.get(0) == null) return true;
-                return list.get(1) != null && list.get(1).value.compareTo(list.get(0).value) > 0 ||
-                        list.get(0).right != null;
-            } else return false;
+            return !deq.isEmpty();
         }
-        // трудоемкость: O(log n)  ресурсоемкость: O(m)
+        // Трудоёмкость - O(1); Ресурсоёмкость - O(1)
 
         /**
          * Получение следующего элемента
@@ -375,48 +375,14 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
          * <p>
          * Средняя
          */
-        public void small() {
-            while (true) {
-                if (list.get(0).left != null) {
-                    list.set(1, list.get(0));
-                    list.set(0, list.get(0).left);
-                } else if (list.get(0).right != null) {
-                    list.set(1, list.get(0));
-                    list.set(0, list.get(0).right);
-                } else break;
-            }
-        }
+
 
         @Override
         public T next() {
-            if (list.get(0) == null) {
-                list = new ArrayList<>(BinarySearchTree.this.findwithParent(root, BinarySearchTree.this.first(), root));
-                return list.get(0).value;
-            }
-            if (list.get(0).value.compareTo(root.value) == 0) {
-                list.set(1, list.get(0));
-                list.set(0, list.get(0).right);
-            }
-            else  if (list.get(0).value.compareTo(root.value) > 0)
-                if (list.get(0).left != null) {
-                    list.set(1, list.get(0));
-                    list.set(0, list.get(0).left);
-                    this.small();
-                } else if (list.get(1) != null && list.get(1).value.compareTo(list.get(0).value) < 0 && list.get(0).right!=null) {
-                    list.set(1, list.get(0));
-                    list.set(0, list.get(0).right);
-                } else throw new NoSuchElementException();
-            else if (list.get(0).right != null) {
-                list.set(1, list.get(0));
-                list.set(0, list.get(0).right);
-                this.small();
-            } else if (list.get(1) != null && list.get(1).value.compareTo(list.get(0).value) > 0)
-                list = new ArrayList<>(BinarySearchTree.this.findwithParent(root, list.get(1).value, root));
-            else throw new NoSuchElementException();
-            flag = false;
-            return list.get(0).value;
+            cur = deq.removeLast().value;
+            return cur;
         }
-        // трудоемкость: O(log n)  ресурсоемкость: O(m)
+        // Трудоёмкость - O(1); Ресурсоёмкость - O(1)
 
         /**
          * Удаление предыдущего элемента
@@ -432,17 +398,12 @@ public class BinarySearchTree<T extends Comparable<T>> extends AbstractSet<T> im
          */
         @Override
         public void remove() {
-            if (list.get(0) == null || flag)
-                throw new IllegalStateException();
-            BinarySearchTree.this.remove(list.get(0).value);
-            flag = true;
-            if (list.get(0).left != null) {
-                list.set(1, list.get(0));
-                list.set(0, list.get(0).left);
-            } else if (list.get(1) != null && list.get(1).value.compareTo(list.get(0).value) < 0)
-                list = new ArrayList<>(BinarySearchTree.this.findwithParent(root, list.get(1).value, root));
-            else list.set(0, null);
+            if (cur != null) {
+                BinarySearchTree.this.remove(cur);
+                cur = null;
+            }
+            else throw new IllegalStateException();
         }
-        // трудоемкость: O(log n)  ресурсоемкость: O(m)
+        // трудоемкость: O(log n)  ресурсоемкость: O(6)
     }
 }

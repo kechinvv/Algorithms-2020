@@ -2,6 +2,9 @@ package lesson7;
 
 import kotlin.NotImplementedError;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -38,9 +41,9 @@ public class JavaDynamicTasks {
             } else if (count[i + 1][j] >= count[i][j + 1]) i++;
             else j++;
         }
-
         return sequence.toString();
     }
+    //сложность: O(mn) ресурсоемкость: O(mn)
 
     /**
      * Наибольшая возрастающая подпоследовательность
@@ -55,8 +58,34 @@ public class JavaDynamicTasks {
      * В примере ответами являются 2, 8, 9, 12 или 2, 5, 9, 12 -- выбираем первую из них.
      */
     public static List<Integer> longestIncreasingSubSequence(List<Integer> list) {
-        throw new NotImplementedError();
+        Collections.reverse(list);
+        if (list.size() == 0) return new ArrayList<Integer>();
+        int[] pos = new int[list.size() + 1];
+        int[] prev = new int[list.size()];
+        int length = 0;
+        for (int i = 0; i < list.size(); i++) {
+            int l = 1;
+            int r = length;
+            while (l <= r) {
+                int m = (l + r) / 2;
+                if (list.get(pos[m]) < list.get(i)) r = m - 1;
+                else l = m + 1;
+            }
+            prev[i] = pos[l - 1];
+            pos[l] = i;
+            if (l > length) {
+                length = l;
+            }
+        }
+        List<Integer> out = new ArrayList<>();
+        int p = pos[length];
+        for (int i = 0; i<=length-1; i++) {
+            out.add(list.get(p));
+            p = prev[p];
+        }
+        return out;
     }
+    //сложность: O(n log n) ресурсоемкость: O(n)
 
     /**
      * Самый короткий маршрут на прямоугольном поле.

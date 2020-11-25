@@ -1,21 +1,17 @@
 package lesson4;
 
-import java.util.*;
-import kotlin.NotImplementedError;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+
 
 /**
  * Префиксное дерево для строк
  */
 public class Trie extends AbstractSet<String> implements Set<String> {
 
-    private static class Node {
-        Map<Character, Node> children = new LinkedHashMap<>();
-    }
-
     private Node root = new Node();
-
     private int size = 0;
 
     @Override
@@ -84,16 +80,71 @@ public class Trie extends AbstractSet<String> implements Set<String> {
 
     /**
      * Итератор для префиксного дерева
-     *
+     * <p>
      * Спецификация: {@link Iterator} (Ctrl+Click по Iterator)
-     *
+     * <p>
      * Сложная
      */
     @NotNull
     @Override
     public Iterator<String> iterator() {
-        // TODO
-        throw new NotImplementedError();
+        return new TrieIterator();
     }
 
+    private static class Node {
+        Map<Character, Node> children = new LinkedHashMap<>();
+    }
+
+    public class Pair {
+        Character val;
+        Node node;
+
+        Pair(Character v, Node n) {
+            val = v;
+            node = n;
+        }
+
+        public Pair() {
+
+        }
+    }
+
+    public class TrieIterator implements Iterator<String> {
+        String cur;
+        ArrayDeque<String> deque = new ArrayDeque();
+
+        private TrieIterator() {
+            if (root != null) fill(root, "");
+        }
+
+        public void fill(Node node, String word) {
+            for (Map.Entry<Character, Node> entry : node.children.entrySet()) {
+                if (entry.getKey().equals((char) 0)) deque.push(word);
+                else fill(entry.getValue(), word + entry.getKey());
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !deque.isEmpty();
+        }
+        //сложность: O(1) Ресурсоемкость: O(1)
+
+        @Override
+        public String next() {
+            cur = deque.removeLast();
+            return cur;
+        }
+        //сложность: O(1) Ресурсоемкость: O(1)
+
+        @Override
+        public void remove() {
+            if (cur!= null) {
+                Trie.this.remove(cur);
+                cur=null;
+            }
+            else throw new IllegalStateException();
+        }
+        //сложность: O(n) Ресурсоемкость: O(n)
+    }
 }

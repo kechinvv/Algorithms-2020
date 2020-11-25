@@ -75,6 +75,11 @@ abstract class AbstractOpenAddressingSetTest {
                     "The size of the set is not as expected."
                 )
             }
+            val set = OpenAddressingSet<String>(5);
+            set.add("a")
+            set.remove("a")
+            assertTrue { set.isEmpty() }
+            assertFalse { set.remove("a") }
         }
     }
 
@@ -113,7 +118,7 @@ abstract class AbstractOpenAddressingSetTest {
                 controlSet.isEmpty(),
                 "OpenAddressingSetIterator doesn't traverse the entire set."
             )
-            assertFailsWith<IllegalStateException>("Something was supposedly returned after the elements ended") {
+            assertFailsWith<NoSuchElementException>("Something was supposedly returned after the elements ended") {
                 openAddressingSetIter.next()
             }
             println("All clear!")
@@ -175,5 +180,16 @@ abstract class AbstractOpenAddressingSetTest {
             }
             println("All clear!")
         }
+        val set = OpenAddressingSet<String>(10)
+        for (i in 1..100) {
+            val string = "a" + i.toChar()
+            set.add(string)
+        }
+        val iter = set.iterator();
+        for (i in 1..100) {
+            iter.next()
+            iter.remove()
+        }
+        assertTrue { set.isEmpty() }
     }
 }

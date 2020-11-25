@@ -1,9 +1,12 @@
 package lesson4
 
+import ru.spbstu.kotlin.generate.util.nextString
 import java.util.*
 import kotlin.math.abs
-import ru.spbstu.kotlin.generate.util.nextString
-import kotlin.test.*
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 abstract class AbstractTrieTest {
 
@@ -104,9 +107,19 @@ abstract class AbstractTrieTest {
                 controlSet.isEmpty(),
                 "TrieIterator doesn't traverse the entire set."
             )
-            assertFailsWith<IllegalStateException>("Something was supposedly returned after the elements ended") {
+            assertFailsWith<NoSuchElementException>("Something was supposedly returned after the elements ended") {
                 trieIter.next()
             }
+            val trie = Trie()
+            for (i in 1..100) {
+                val string = "a" + i.toChar()
+                trie.add(string)
+            }
+            val iter = trie.iterator();
+            for (i in 1..100) {
+                iter.next()
+            }
+            assertFalse { iter.hasNext() }
             println("All clear!")
         }
     }
@@ -168,6 +181,17 @@ abstract class AbstractTrieTest {
                     "Trie set has the element $element that is not in control set."
                 )
             }
+            val trie = Trie()
+            for (i in 1..100) {
+                val string = "a" + i.toChar()
+                trie.add(string)
+            }
+            val iter = trie.iterator();
+            for (i in 1..100) {
+                iter.next()
+                iter.remove()
+            }
+            assertTrue { trie.isEmpty() }
             println("All clear!")
         }
     }
